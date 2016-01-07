@@ -3,12 +3,13 @@ package main
 
 import (
 	"fmt"
-//		"io"
-		"net/http"
 	"io/ioutil"
-		"golang.org/x/net/html/charset"
-)
+	"net/http"
+	"os"
 
+	"github.com/parnurzeal/gorequest"
+	"golang.org/x/net/html/charset"
+)
 
 //получение страницы из урла url
 func gethtmlpage(url string) []byte {
@@ -32,7 +33,41 @@ func gethtmlpage(url string) []byte {
 	return body
 }
 
+//сохранить в файл
+func Savestrtofile(namef string, str string) int {
+	file, err := os.Create(namef)
+	if err != nil {
+		// handle the error here
+		return -1
+	}
+	defer file.Close()
+
+	file.WriteString(str)
+	return 0
+}
+
+func getimagefromcamera(url string, user string, passw string) string {
+	request := gorequest.New().SetBasicAuth(user, passw)
+	_, body, errs := request.Get(url).End()
+	if errs != nil {
+		return ""
+	}
+	return body
+}
 
 func main() {
-	fmt.Println("Hello World!")
+	var (
+		us    string
+		passw string
+	)
+	urls := "http://192.168.0.2/image/jpeg.cgi"
+
+	fmt.Println("Введите пользователя для доступа к камере: ")
+	fmt.Scanf("%s", &us)
+	fmt.Println("Введите пароль для доступа к камере: ")
+	fmt.Scanf("%s", &passw)
+
+	res := getimagefromcamera(urls, us, passw)
+	Savestrtofile("image.jpg", res)
+
 }
